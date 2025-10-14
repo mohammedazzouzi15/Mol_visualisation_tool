@@ -17,7 +17,7 @@ class MoleculeVisualizer:
         self.database_url = database_url
 
     def create_3d_plot(
-        self, molecule_name: str, show_info: bool = True
+        self, molecule_name: str, show_info: bool = True, key_prefix: str = ""
     ) -> None:
         """Create 3D molecular plot.
 
@@ -25,7 +25,9 @@ class MoleculeVisualizer:
             molecule_name: Name of molecule in database
             show_info: Whether to show molecule information
         """
+        tab1, tab2, tab3 = st.tabs(["3D Viewer", "With charges", "Multiple molecules"])
         try:
+            
             # Get molecule data
             db = connect(self.database_url)
             atoms = db.get(name=molecule_name)
@@ -38,27 +40,28 @@ class MoleculeVisualizer:
 
             # Generate atom data for JavaScript
             atom_data_js = self._generate_atom_data_js(atoms.toatoms())
-
+            with tab1:
             # Create 3D viewer
-            self._create_3d_viewer(
-                xyz_data, atom_data_js, color_by_charges=False
-            )
+                self._create_3d_viewer(
+                    xyz_data, atom_data_js, color_by_charges=False
+                )
 
-            with st.expander("🔧 Extra Visualization Options", expanded=False):
+            with tab2:
                 
                 charges_available_list = [ x for x in atoms.data.keys() if (x.startswith("charge") or x.startswith("charges")) ]
-                st.checkbox("Color by Partial Charges", value=True)
-                st.checkbox("Show Atom Info on Click", value=True)
+                st.checkbox("Color by Partial Charges", value=True, key="color_by_charges"+key_prefix)
+                st.checkbox("Show Atom Info on Click", value=True, key="show_atom_info"+key_prefix)
                 selected_charge = st.selectbox(
                     "Select charge to color by",
                     options=charges_available_list,
                     index=0,
+                    key="selected_charge"+key_prefix
                 )
                 self._create_3d_viewer(
                     xyz_data, atom_data_js, color_by_charges=True, charges=atoms.data.get(selected_charge, None)
                 )
 
-            with st.expander("multiple molecules", expanded=False):
+            with tab3:
                 st.write("To visualize multiple molecules, select them from the sidebar and use the 'Display Molecule' button.")
                 st.session_state.selected_molecules_dict[molecule_name] ={"xyz": xyz_data, "atom_data_js": atom_data_js, "charges": atoms.data.get(selected_charge, None)}
                 cols = st.columns(len(st.session_state.selected_molecules_dict))
@@ -69,7 +72,7 @@ class MoleculeVisualizer:
                         self._create_3d_viewer(
                             mol_data["xyz"], mol_data["atom_data_js"], color_by_charges=True, charges=mol_data["charges"]
                         )
-                if st.button("Clear Selection"):
+                if st.button("Clear Selection", key="clear_selection"+key_prefix):
                     st.session_state.selected_molecules_dict = {}
         except Exception as e:
             st.error(f"Error visualizing molecule '{molecule_name}': {e}")
@@ -355,7 +358,7 @@ def create_molecule_viewer(database_url: str) -> MoleculeVisualizer:
 
 
 def display_molecule_from_csv_selection(
-    database_url: str, molecule_name: str, container=None
+    database_url: str, molecule_name: str, container=None, key_prefix: str = ""
 ) -> None:
     """Display molecule visualization in a Streamlit container.
 
@@ -367,10 +370,10 @@ def display_molecule_from_csv_selection(
     if container:
         with container:
             visualizer = create_molecule_viewer(database_url)
-            visualizer.create_3d_plot(molecule_name)
+            visualizer.create_3d_plot(molecule_name, key_prefix="_"+molecule_name)
     else:
         visualizer = create_molecule_viewer(database_url)
-        visualizer.create_3d_plot(molecule_name)
+        visualizer.create_3d_plot(molecule_name, key_prefix="_"+molecule_name)
 
 
 # Configuration for common databases

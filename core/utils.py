@@ -438,10 +438,10 @@ class ConfigManager:
             if suggested_col and suggested_col in text_cols:
                 default_idx = text_cols.index(suggested_col)
             
-            molecule_col = st.selectbox(
+            molecule_col = st.multiselect(
                 "Molecule Name Column",
                 text_cols,
-                index=default_idx,
+                #index=default_idx,
                 help="Column containing molecule names/identifiers"
             )
             

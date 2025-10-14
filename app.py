@@ -15,7 +15,8 @@ class LiteVizApp:
         """Initialize the app."""
         self.csv_handler = CSVHandler()
         self.plotter = InteractivePlotter()
-        st.session_state.selected_molecules_dict = {}
+        if "selected_molecules_dict" not in st.session_state:
+            st.session_state.selected_molecules_dict = {}
         
         # Initialize session state
         if "df" not in st.session_state:

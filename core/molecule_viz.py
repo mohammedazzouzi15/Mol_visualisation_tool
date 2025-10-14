@@ -57,6 +57,20 @@ class MoleculeVisualizer:
                 self._create_3d_viewer(
                     xyz_data, atom_data_js, color_by_charges=True, charges=atoms.data.get(selected_charge, None)
                 )
+
+            with st.expander("multiple molecules", expanded=False):
+                st.write("To visualize multiple molecules, select them from the sidebar and use the 'Display Molecule' button.")
+                st.session_state.selected_molecules_dict[molecule_name] ={"xyz": xyz_data, "atom_data_js": atom_data_js, "charges": atoms.data.get(selected_charge, None)}
+                cols = st.columns(len(st.session_state.selected_molecules_dict))
+                for i, (mol_name, mol_data) in enumerate(st.session_state.selected_molecules_dict.items()):
+                    with cols[i]:
+                        st.write(f"**{mol_name}**")
+                        if st.button(f"Display {mol_name}"):
+                            self._create_3d_viewer(
+                                mol_data["xyz"], mol_data["atom_data_js"], color_by_charges=True, charges=mol_data["charges"]
+                            )
+                if st.button("Clear Selection"):
+                    st.session_state.selected_molecules_dict = {}
         except Exception as e:
             st.error(f"Error visualizing molecule '{molecule_name}': {e}")
 

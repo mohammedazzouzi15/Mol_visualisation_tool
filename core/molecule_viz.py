@@ -65,10 +65,10 @@ class MoleculeVisualizer:
                 for i, (mol_name, mol_data) in enumerate(st.session_state.selected_molecules_dict.items()):
                     with cols[i]:
                         st.write(f"**{mol_name}**")
-                        if st.button(f"Display {mol_name}"):
-                            self._create_3d_viewer(
-                                mol_data["xyz"], mol_data["atom_data_js"], color_by_charges=True, charges=mol_data["charges"]
-                            )
+                        
+                        self._create_3d_viewer(
+                            mol_data["xyz"], mol_data["atom_data_js"], color_by_charges=True, charges=mol_data["charges"]
+                        )
                 if st.button("Clear Selection"):
                     st.session_state.selected_molecules_dict = {}
         except Exception as e:

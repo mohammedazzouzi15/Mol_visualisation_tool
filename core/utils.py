@@ -33,13 +33,22 @@ class CSVHandler:
             Loaded DataFrame or None
         """
         st.subheader("📁 Upload CSV Data")
-        
-        uploaded_file = st.file_uploader(
-            "Choose a CSV file",
-            type=["csv", "txt"],
-            key=key,
-            help="Upload a CSV file with your experimental data"
-        )
+
+        if st.selectbox(
+            "How would you like to provide your data?",
+            [ "Use example dataset","Upload CSV file"]
+        ) == "Use example dataset":
+            # Load example dataset
+            uploaded_file = pd.read_csv("examples/sampled_molecules_descriptors.csv")
+            return uploaded_file
+        else:
+            uploaded_file = st.file_uploader(
+                "Choose a CSV file",
+                type=["csv", "txt"],
+                key=key,
+                help="Upload a CSV file with your experimental data"
+
+            )
         
         if uploaded_file is not None:
             return self._process_uploaded_file(uploaded_file)

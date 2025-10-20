@@ -130,7 +130,9 @@ class LiteVizApp:
     def _show_main_interface(self, df: pd.DataFrame) -> None:
         """Show the main interface with data and plots."""
         # Create tabs for different views
-        tab1, tab2, tab3 = st.tabs(["📊 Interactive Plots", "📋 Data Explorer", "🔄 CSV to ASE Database"])
+        tab1, tab2, tab3 = st.tabs(
+            ["📊 Interactive Plots", "📋 Data Explorer", "🔄 CSV to ASE Database"]
+        )
 
         with tab1:
             self._show_plotting_interface(df)
@@ -183,10 +185,16 @@ class LiteVizApp:
 
         with col1:
             # Display the plot with selection capability
-            event = st.plotly_chart(fig, use_container_width=True, on_select="rerun")
+            #def _selection_callback():
+             #   return self._handle_plot_selection(selection, df, mol_config, col2)
+            event = st.plotly_chart(
+                fig,
+                use_container_width=True,
+                on_select="rerun",
+            )
 
             # Handle point selection for molecule visualization
-            if mol_config.get("enabled") and event:
+            if mol_config.get("enabled"):
                 self._handle_plot_selection(event, df, mol_config, col2)
 
         if not mol_config.get("enabled"):
@@ -211,11 +219,9 @@ class LiteVizApp:
 
             # Extract molecule name from the selected point
             # st.write(selected_point)
-            molecule_name = (
-                selected_point["customdata"] if "customdata" in selected_point else None
-            )
+            molecule_name = selected_point["text"] if "text" in selected_point else None
 
-            # st.write(molecule_name)
+            #st.write(selected_point)
 
             if molecule_name and self.database_url:
                 with container:

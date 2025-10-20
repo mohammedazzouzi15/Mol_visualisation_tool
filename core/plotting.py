@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly_resampler import FigureResampler, FigureWidgetResampler
 
 
 class InteractivePlotter:
@@ -48,23 +49,35 @@ class InteractivePlotter:
         """
         # Prepare plot arguments
         plot_kwargs = {
-            "data_frame": df,
-            "x": x_col,
-            "y": y_col,
-            "hover_data": hover_data or [],
+            "x": df[x_col],
+            "y": df[y_col],
+            "mode": "markers",
+            "marker": {"size": 8, "opacity": 0.6},
+            "name": "Data points",
+            #"render_mode": "webgl",
         }
 
+        if hover_data:
+            plot_kwargs["text"] = df[hover_data].astype(str).agg("<br>".join, axis=1)
+            plot_kwargs["hovertemplate"] = (
+                f"{x_col}: %{{x}}<br>{y_col}: %{{y}}<br>%{{text}}<extra></extra>"
+            )
+            
         if color_col and color_col in df.columns:
-            plot_kwargs["color"] = color_col
+            plot_kwargs["color"] = df[color_col]
 
         if size_col and size_col in df.columns:
-            plot_kwargs["size"] = size_col
+            plot_kwargs["size"] = df[size_col]
 
         if title:
             plot_kwargs["title"] = title
 
         # Create the plot
-        fig = px.scatter(**plot_kwargs)
+        fig = go.Figure()
+
+        fig.add_trace(go.Scattergl(**plot_kwargs))
+
+        #fig = px.scatter(**plot_kwargs)
 
         # Add trendline if both axes are numeric
         if (
@@ -221,6 +234,7 @@ class InteractivePlotter:
             "mode": "markers",
             "marker": {"size": 8, "opacity": 0.6},
             "name": "Data points",
+            "render_mode": "webgl",
         }
 
         if label_col and label_col in df.columns:
@@ -242,6 +256,7 @@ class InteractivePlotter:
                 mode="lines",
                 line={"color": "red", "dash": "dash", "width": 2},
                 name="Perfect prediction",
+                
             )
         )
 
@@ -283,6 +298,7 @@ class InteractivePlotter:
                 mode="lines",
                 line={"color": "red", "width": 2},
                 name=f"Trendline (slope={coeffs[0]:.3f})",
+                
             )
         )
 
